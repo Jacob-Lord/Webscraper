@@ -2,6 +2,8 @@ import requests
 import webbrowser
 from bs4 import BeautifulSoup
 from tabulate import tabulate
+import networkx as nx # Referenece: Tutorial — NetworkX 3.2.1 documentation
+import matplotlib.pyplot as plt 
 
 def initialize_html(url):
     '''
@@ -19,6 +21,37 @@ def create_html_file(file_name, html):
     file = open(file_name, "w")
     file.write(html)
     file.close()
+
+def create_graph(course_list):
+    #create a graph object
+    G = nx.DiGraph()
+
+    #add nodes to graph
+    for x in course_list:
+        G.add_node(x[0])
+
+    #add edges
+    for x in course_list:
+            if len(x[3]) > 9: #if there if more than 1 prereq, so split string of prereqs into a real list that can be iterated
+                prereq_list = x[3].split(', ')
+                for _ in prereq_list: 
+                    G.add_edge(x[0], _) #draw edge from course to its prereq
+            elif len(x[3]) > 0:
+                G.add_edge(x[0], x[3]) #draw edge from course to prereq if there is only 1
+    
+    # Create a graph
+    plt.subplots(figsize=(25,25))
+    pos = nx.random_layout(G)  # Positioning of nodes
+
+    # Draw the graph
+    nx.draw(G, pos, with_labels=True, font_size=4.5, font_weight='bold', node_color="#009999", node_size=350, arrowsize=5, width=0.5) #hopefully nobody seeing this is colorblind
+
+    nx.draw_networkx_edges(G, pos, width=0.5, arrowsize=5, node_size= 350, edge_color='#774B4B')
+
+    # Show the graph
+    plt.axis('on')
+    plt.show()
+
     
 def main():
     url = 'https://catalog.ucdenver.edu/cu-denver/undergraduate/courses-a-z/csci/' #url for program to scrape
@@ -66,7 +99,7 @@ def main():
         pass_count = 1 #count number of iterations in for loop
 
         for string in prereq: #delete \xa0 substring from prereq course codes
-            x = string.replace('\xa0', ' ')
+            string = string.replace('\xa0', ' ')
             if pass_count < len(prereq): #if there is more than one prereq
                 course_prereqs += string + ', '
             elif len(string) < 9: #there is a case where there is no CSCI prior to the course code as it is respectively implied, so insert CSCI (!specific to CSCI UCDenver page!)
@@ -84,8 +117,8 @@ def main():
 
     table_html = tabulate(course_list, tablefmt='html') #create html data from table data scraped and collected
     create_html_file('CS_courses.html', table_html) #create the html file from the data
-    webbrowser.open_new_tab('CS_courses.html') #open the html file in the webbrowser for viewing
-
+    #webbrowser.open_new_tab('CS_courses.html') #open the html file in the webbrowser for viewing
+    create_graph(course_list)
 
 
 
