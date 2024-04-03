@@ -13,7 +13,6 @@ def initialize_html(url):
     html = r.text
     return html
 
-
 def create_html_file(file_name, html):
     '''
     Desc: Creates a .html file from html data
@@ -52,16 +51,11 @@ def create_graph(course_list):
     plt.axis('on')
     plt.show()
 
-    
-def main():
-    url = 'https://catalog.ucdenver.edu/cu-denver/undergraduate/courses-a-z/csci/' #url for program to scrape
-    html = initialize_html(url)
-    soup = BeautifulSoup(html, 'html.parser')
-    courses = soup.find_all("div", class_="courseblock")
-    course_dict = {} #initialize dictionary to hold all future course entries
-    course_list = []
-
-
+def scrape_courses_info(courses):
+    '''
+    Desc: Scrapes the course information from the CS crouse list html
+    '''
+    course_list = [] #holds course entries
     for course in courses:
         course_info = [] #store info from courses in a list format for tabulate later on
         #get course code
@@ -111,17 +105,19 @@ def main():
             pass_count += 1 #incrememnt pass_count
 
         course_info.append(course_prereqs) #add course prereqs to course_info list
-
         course_list.append(course_info) #add course_info list to the course_list to later be tabulated
-                
 
+    return course_list #return list containing list of courses and their respective info
+    
+def main():
+    url = 'https://catalog.ucdenver.edu/cu-denver/undergraduate/courses-a-z/csci/' #url for program to scrape
+    html = initialize_html(url) #get html from webpage
+    soup = BeautifulSoup(html, 'html.parser') #initialize parser
+    courses = soup.find_all("div", class_="courseblock") #get course html from webpage html
+    course_list = scrape_courses_info(courses) #scrape course info from courses html and return them as a list of lists of course info
     table_html = tabulate(course_list, tablefmt='html') #create html data from table data scraped and collected
     create_html_file('CS_courses.html', table_html) #create the html file from the data
-    #webbrowser.open_new_tab('CS_courses.html') #open the html file in the webbrowser for viewing
-    create_graph(course_list)
-
-
-
-
+    webbrowser.open_new_tab('CS_courses.html') #open the html file in the webbrowser for viewing
+    create_graph(course_list) #create network of courses and prereqs
 
 main()
