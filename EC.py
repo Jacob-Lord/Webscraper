@@ -21,6 +21,9 @@ def create_html_file(file_name, html):
     file.write(html)
     file.close()
 
+def display_html(html_file):
+    webbrowser.open_new_tab(html_file)
+
 def create_graph(course_list):
     #create a graph object
     G = nx.DiGraph()
@@ -109,15 +112,56 @@ def scrape_courses_info(courses):
 
     return course_list #return list containing list of courses and their respective info
     
-def main():
+def scrape_UCD():
+    '''
+    Desc: Scrapes the CU Denver CS course catalog for information and returns the data as a table in a .html file.
+    Returns a string of the .html's file name
+    '''
     url = 'https://catalog.ucdenver.edu/cu-denver/undergraduate/courses-a-z/csci/' #url for program to scrape
     html = initialize_html(url) #get html from webpage
     soup = BeautifulSoup(html, 'html.parser') #initialize parser
     courses = soup.find_all("div", class_="courseblock") #get course html from webpage html
     course_list = scrape_courses_info(courses) #scrape course info from courses html and return them as a list of lists of course info
     table_html = tabulate(course_list, tablefmt='html') #create html data from table data scraped and collected
-    create_html_file('CS_courses.html', table_html) #create the html file from the data
-    webbrowser.open_new_tab('CS_courses.html') #open the html file in the webbrowser for viewing
+    html_filename = 'CS_courses.html'
+    create_html_file(html_filename, table_html) #create the html file from the data
     create_graph(course_list) #create network of courses and prereqs
+    return html_filename
+
+def scrape_COVID_data():
+    '''
+    Desc: Scrapes the CO Covid-19 official metrics page for the metric data and returns it as a table in a .html file.
+    Returns a string of the .html's file name
+    '''
+    url = "https://cdphe.colorado.gov/covid-19/data"
+    html = initialize_html(url)
+    soup = BeautifulSoup(html, 'html.parser') #initialize parser
+    covid_table = soup.find("table", attrs={'dir':'ltr'}) #gather covid table from html data
+
+    table = [] #list of lists of table rows which will be turned into html
+    row_count = 0 #display row number in table
+    table_rows = (covid_table.find("tbody")).find_all("tr")
+    for row in table_rows: #for each row in the table
+        table_row_data = [] #initialize table_row_data as empty
+        table_row_data.append(row_count) #add row number to front of row
+        row_data = row.find_all("td") #extract the cells from the row
+        for data in row_data: #extract the data from the cells
+            table_row_data.append(data.text) #append the text data to table_row_data 
+        table.append(table_row_data) #add row to table list
+        row_count += 1
+    
+    table_html = tabulate(table, tablefmt='html') #create an html table using tabulate method from import
+    html_filename = 'COVID_County_Data_CO.html'
+    create_html_file(html_filename, table_html) #generate html file from the html data
+    return html_filename
+
+def main():
+    #UCD Scrape
+    html = scrape_UCD()
+    display_html(html)
+
+    #CO COVID-19 Metric Scrape
+    html = scrape_COVID_data()
+    display_html(html)
 
 main()
