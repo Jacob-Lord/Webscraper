@@ -22,9 +22,15 @@ def create_html_file(file_name, html):
     file.close()
 
 def display_html(html_file):
+    '''
+    Desc: Displays a html file in a web browser launched by this function
+    '''
     webbrowser.open_new_tab(html_file)
 
 def create_graph(course_list):
+    '''
+    Desc: Creates a network graph of courses and their prerequisites from a list of lists containing course informtation.
+    '''
     #create a graph object
     G = nx.DiGraph()
 
