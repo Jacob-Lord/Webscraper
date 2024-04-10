@@ -3,10 +3,8 @@
 # Student Info
 
 - **Name** : Jacob Lord
-- **Student ID**: 109632812
-- **Class** : CSCI 3412
-- **HW#** : 4 Extra Credit
-- **Due Date** : April 5, 2024
+- **Title** : Web Scraper Exploration
+- **Date** : April 5, 2024
 
 ---
 
